@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { deleteBook } from "../actions";
 import { toggleBookOnShelf } from "@/app/shelves/actions";
 import { toggleBookTag } from "@/app/tags/actions";
+import { createNote, deleteNote } from "@/app/notes/actions";
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -125,8 +126,34 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
         </div>
       </section>
 
-      <section className="space-y-2">
+      <section className="space-y-3">
         <h2 className="text-sm font-medium uppercase text-neutral-500">Notes</h2>
+        <form
+          action={createNote.bind(null, book.id)}
+          className="space-y-2 rounded border border-neutral-200 bg-white p-3 text-sm"
+        >
+          <div className="flex gap-2">
+            <input
+              name="page"
+              type="number"
+              min={0}
+              placeholder="Page"
+              className="w-24 rounded border border-neutral-300 px-2 py-1 text-sm"
+            />
+            <input
+              name="body"
+              required
+              placeholder="Add a note…"
+              className="flex-1 rounded border border-neutral-300 px-2 py-1 text-sm"
+            />
+            <button
+              type="submit"
+              className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm text-white hover:bg-neutral-700"
+            >
+              Save
+            </button>
+          </div>
+        </form>
         {book.notes.length === 0 ? (
           <p className="text-sm text-neutral-500">No notes yet.</p>
         ) : (
@@ -138,6 +165,14 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
                   <span>{note.createdAt.toISOString().slice(0, 10)}</span>
                 </div>
                 <p className="mt-1">{note.body}</p>
+                <form action={deleteNote.bind(null, note.id)} className="mt-2">
+                  <button
+                    type="submit"
+                    className="text-xs text-red-700 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </form>
               </li>
             ))}
           </ul>
