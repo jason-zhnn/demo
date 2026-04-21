@@ -5,6 +5,7 @@ import { formatPages } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 import { deleteBook } from "../actions";
 import { toggleBookOnShelf } from "@/app/shelves/actions";
+import { toggleBookTag } from "@/app/tags/actions";
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -16,6 +17,8 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
 
   const allShelves = await prisma.shelf.findMany({ orderBy: { name: "asc" } });
   const currentShelfIds = new Set(book.shelves.map((s) => s.shelfId));
+  const allTags = await prisma.tag.findMany({ orderBy: { name: "asc" } });
+  const currentTagIds = new Set(book.tags.map((t) => t.tagId));
 
   return (
     <div className="space-y-8">
@@ -102,19 +105,23 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
       <section className="space-y-2">
         <h2 className="text-sm font-medium uppercase text-neutral-500">Tags</h2>
         <div className="flex flex-wrap gap-2">
-          {book.tags.length === 0 ? (
-            <p className="text-sm text-neutral-500">No tags.</p>
-          ) : (
-            book.tags.map((t) => (
-              <Link
-                key={t.tagId}
-                href={`/tags/${t.tag.slug}`}
-                className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-700 hover:bg-neutral-200"
-              >
-                {t.tag.name}
-              </Link>
-            ))
-          )}
+          {allTags.map((tag) => {
+            const isOn = currentTagIds.has(tag.id);
+            return (
+              <form key={tag.id} action={toggleBookTag.bind(null, book.id, tag.id)}>
+                <button
+                  type="submit"
+                  className={
+                    isOn
+                      ? "rounded-full border border-neutral-900 bg-neutral-900 px-2.5 py-0.5 text-xs text-white"
+                      : "rounded-full border border-neutral-300 bg-white px-2.5 py-0.5 text-xs text-neutral-700 hover:border-neutral-500"
+                  }
+                >
+                  {tag.name}
+                </button>
+              </form>
+            );
+          })}
         </div>
       </section>
 
