@@ -7,6 +7,8 @@ import { deleteBook } from "../actions";
 import { toggleBookOnShelf } from "@/app/shelves/actions";
 import { toggleBookTag } from "@/app/tags/actions";
 import { createNote, deleteNote } from "@/app/notes/actions";
+import { createSession, deleteSession } from "@/app/sessions/actions";
+import { sessionDurationMinutes } from "@/lib/sessions";
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -179,21 +181,77 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
         )}
       </section>
 
-      <section className="space-y-2">
+      <section className="space-y-3">
         <h2 className="text-sm font-medium uppercase text-neutral-500">Reading sessions</h2>
+        <form
+          action={createSession.bind(null, book.id)}
+          className="space-y-2 rounded border border-neutral-200 bg-white p-3 text-sm"
+        >
+          <div className="grid gap-2 sm:grid-cols-4">
+            <label className="flex flex-col text-xs text-neutral-600">
+              Started at
+              <input
+                name="startedAt"
+                type="datetime-local"
+                className="mt-1 rounded border border-neutral-300 px-2 py-1 text-sm"
+              />
+            </label>
+            <label className="flex flex-col text-xs text-neutral-600">
+              Ended at
+              <input
+                name="endedAt"
+                type="datetime-local"
+                className="mt-1 rounded border border-neutral-300 px-2 py-1 text-sm"
+              />
+            </label>
+            <label className="flex flex-col text-xs text-neutral-600">
+              Pages read
+              <input
+                name="pagesRead"
+                type="number"
+                min={0}
+                defaultValue={0}
+                className="mt-1 rounded border border-neutral-300 px-2 py-1 text-sm"
+              />
+            </label>
+            <div className="flex items-end">
+              <button
+                type="submit"
+                className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm text-white hover:bg-neutral-700"
+              >
+                Log session
+              </button>
+            </div>
+          </div>
+        </form>
         {book.sessions.length === 0 ? (
           <p className="text-sm text-neutral-500">No sessions logged.</p>
         ) : (
           <ul className="space-y-2">
-            {book.sessions.map((session) => (
-              <li
-                key={session.id}
-                className="flex items-center justify-between rounded border border-neutral-200 bg-white p-3 text-sm"
-              >
-                <span>{session.startedAt.toISOString().slice(0, 10)}</span>
-                <span>{formatPages(session.pagesRead)}</span>
-              </li>
-            ))}
+            {book.sessions.map((session) => {
+              const minutes = sessionDurationMinutes(session.startedAt, session.endedAt);
+              return (
+                <li
+                  key={session.id}
+                  className="flex items-center justify-between rounded border border-neutral-200 bg-white p-3 text-sm"
+                >
+                  <div>
+                    <p>{session.startedAt.toISOString().slice(0, 10)}</p>
+                    <p className="text-xs text-neutral-500">
+                      {minutes != null ? `${minutes} min` : "open"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span>{formatPages(session.pagesRead)}</span>
+                    <form action={deleteSession.bind(null, session.id)}>
+                      <button type="submit" className="text-xs text-red-700 hover:underline">
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
