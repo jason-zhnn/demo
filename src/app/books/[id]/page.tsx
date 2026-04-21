@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBook } from "@/lib/books";
 import { formatPages } from "@/lib/format";
+import { deleteBook } from "../actions";
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -13,10 +14,26 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="flex items-center justify-between">
         <Link href="/library" className="text-sm text-neutral-600 hover:underline">
           ← Library
         </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/books/${book.id}/edit`}
+            className="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm hover:border-neutral-500"
+          >
+            Edit
+          </Link>
+          <form action={deleteBook.bind(null, book.id)}>
+            <button
+              type="submit"
+              className="rounded-md border border-red-300 bg-white px-3 py-1.5 text-sm text-red-700 hover:border-red-500"
+            >
+              Delete
+            </button>
+          </form>
+        </div>
       </div>
 
       <header className="space-y-2">
