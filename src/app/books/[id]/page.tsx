@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBook } from "@/lib/books";
 import { formatPages } from "@/lib/format";
+import { prisma } from "@/lib/prisma";
 import { deleteBook } from "../actions";
+import { toggleBookOnShelf } from "@/app/shelves/actions";
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -11,6 +13,9 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
 
   const book = await getBook(bookId);
   if (!book) notFound();
+
+  const allShelves = await prisma.shelf.findMany({ orderBy: { name: "asc" } });
+  const currentShelfIds = new Set(book.shelves.map((s) => s.shelfId));
 
   return (
     <div className="space-y-8">
@@ -74,19 +79,23 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
       <section className="space-y-2">
         <h2 className="text-sm font-medium uppercase text-neutral-500">Shelves</h2>
         <div className="flex flex-wrap gap-2">
-          {book.shelves.length === 0 ? (
-            <p className="text-sm text-neutral-500">Not on any shelf.</p>
-          ) : (
-            book.shelves.map((s) => (
-              <Link
-                key={s.shelfId}
-                href={`/shelves/${s.shelf.slug}`}
-                className="rounded-full border border-neutral-300 bg-white px-3 py-1 text-sm hover:border-neutral-500"
-              >
-                {s.shelf.name}
-              </Link>
-            ))
-          )}
+          {allShelves.map((shelf) => {
+            const isOn = currentShelfIds.has(shelf.id);
+            return (
+              <form key={shelf.id} action={toggleBookOnShelf.bind(null, book.id, shelf.id)}>
+                <button
+                  type="submit"
+                  className={
+                    isOn
+                      ? "rounded-full border border-neutral-900 bg-neutral-900 px-3 py-1 text-sm text-white"
+                      : "rounded-full border border-neutral-300 bg-white px-3 py-1 text-sm text-neutral-700 hover:border-neutral-500"
+                  }
+                >
+                  {shelf.name}
+                </button>
+              </form>
+            );
+          })}
         </div>
       </section>
 
