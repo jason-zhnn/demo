@@ -7,6 +7,101 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Placeholder {
-  id Int @id @default(autoincrement())
+model Book {
+  id            Int      @id @default(autoincrement())
+  title         String
+  subtitle      String?
+  isbn          String?  @unique
+  pageCount     Int?
+  coverUrl      String?
+  publishedYear Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  authors  BookAuthor[]
+  shelves  BookShelf[]
+  tags     BookTag[]
+  notes    Note[]
+  sessions ReadingSession[]
+}
+
+model Author {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  bio   String?
+  books BookAuthor[]
+}
+
+model Shelf {
+  id          Int     @id @default(autoincrement())
+  name        String
+  slug        String  @unique
+  description String?
+  books       BookShelf[]
+}
+
+model Tag {
+  id    Int     @id @default(autoincrement())
+  name  String
+  slug  String  @unique
+  color String?
+  books BookTag[]
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  bookId    Int
+  page      Int?
+  body      String
+  createdAt DateTime @default(now())
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([bookId])
+}
+
+model ReadingSession {
+  id        Int      @id @default(autoincrement())
+  bookId    Int
+  startedAt DateTime
+  endedAt   DateTime?
+  pagesRead Int
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([bookId])
+}
+
+model Goal {
+  id          Int @id @default(autoincrement())
+  year        Int @unique
+  targetBooks Int
+}
+
+model BookAuthor {
+  bookId   Int
+  authorId Int
+  book     Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  author   Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, authorId])
+  @@index([authorId])
+}
+
+model BookShelf {
+  bookId  Int
+  shelfId Int
+  book    Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  shelf   Shelf @relation(fields: [shelfId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, shelfId])
+  @@index([shelfId])
+}
+
+model BookTag {
+  bookId Int
+  tagId  Int
+  book   Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, tagId])
+  @@index([tagId])
 }
