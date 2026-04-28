@@ -15,6 +15,7 @@ model Book {
   pageCount     Int?
   coverUrl      String?
   publishedYear Int?
+  rating        Int?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

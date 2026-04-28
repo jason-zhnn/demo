@@ -14,6 +14,7 @@ export type ExportBundle = {
     pageCount: number | null;
     coverUrl: string | null;
     publishedYear: number | null;
+    rating?: number | null;
     authors: string[];
     shelves: string[];
     tags: string[];
@@ -57,6 +58,7 @@ export async function buildExport(): Promise<ExportBundle> {
       pageCount: book.pageCount,
       coverUrl: book.coverUrl,
       publishedYear: book.publishedYear,
+      rating: book.rating,
       authors: book.authors.map((a) => a.author.name),
       shelves: book.shelves.map((s) => s.shelf.slug),
       tags: book.tags.map((t) => t.tag.slug),
@@ -164,6 +166,7 @@ export async function applyImport(bundle: ExportBundle): Promise<ImportResult> {
         pageCount: book.pageCount,
         coverUrl: book.coverUrl,
         publishedYear: book.publishedYear,
+        rating: book.rating ?? null,
         authors: { create: authorIds.map((authorId) => ({ authorId })) },
         shelves: { create: shelfIds.map((shelfId) => ({ shelfId })) },
         tags: { create: tagIds.map((tagId) => ({ tagId })) },

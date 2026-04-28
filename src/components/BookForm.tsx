@@ -7,6 +7,7 @@ type BookFormProps = {
     pageCount: number | null;
     coverUrl: string | null;
     publishedYear: number | null;
+    rating: number | null;
     authorNames: string[];
   };
   submitLabel: string;
@@ -78,6 +79,19 @@ export function BookForm({ action, initial, submitLabel }: BookFormProps) {
         <input
           name="coverUrl"
           defaultValue={initial?.coverUrl ?? ""}
+          className="mt-1 rounded border border-neutral-300 px-2 py-1"
+        />
+      </label>
+
+      <label className="flex flex-col text-sm">
+        <span className="text-neutral-600">Rating (1–5, blank to clear)</span>
+        <input
+          name="rating"
+          type="number"
+          min={1}
+          max={5}
+          step={1}
+          defaultValue={initial?.rating ?? ""}
           className="mt-1 rounded border border-neutral-300 px-2 py-1"
         />
       </label>

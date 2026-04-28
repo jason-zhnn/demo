@@ -49,6 +49,8 @@ export default async function HomePage() {
                 authorNames={book.authors.map((a) => a.author.name)}
                 tagNames={book.tags.map((t) => t.tag.name)}
                 publishedYear={book.publishedYear}
+                coverUrl={book.coverUrl}
+                rating={book.rating}
               />
             ))}
           </div>

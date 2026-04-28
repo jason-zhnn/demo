@@ -16,6 +16,14 @@ function parseOptionalString(value: FormDataEntryValue | null): string | null {
   return trimmed === "" ? null : trimmed;
 }
 
+function parseRating(value: FormDataEntryValue | null): number | null {
+  if (typeof value !== "string" || value.trim() === "") return null;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) return null;
+  if (parsed < 1 || parsed > 5) return null;
+  return parsed;
+}
+
 function parseAuthorNames(value: FormDataEntryValue | null): string[] {
   if (typeof value !== "string") return [];
   return value
@@ -51,6 +59,7 @@ export async function createBook(formData: FormData) {
       pageCount: parseOptionalInt(formData.get("pageCount")),
       coverUrl: parseOptionalString(formData.get("coverUrl")),
       publishedYear: parseOptionalInt(formData.get("publishedYear")),
+      rating: parseRating(formData.get("rating")),
       authors: { create: authorIds.map((authorId) => ({ authorId })) },
     },
   });
@@ -76,6 +85,7 @@ export async function updateBook(id: number, formData: FormData) {
         pageCount: parseOptionalInt(formData.get("pageCount")),
         coverUrl: parseOptionalString(formData.get("coverUrl")),
         publishedYear: parseOptionalInt(formData.get("publishedYear")),
+        rating: parseRating(formData.get("rating")),
         authors: { create: authorIds.map((authorId) => ({ authorId })) },
       },
     }),
@@ -90,4 +100,12 @@ export async function deleteBook(id: number) {
   await prisma.book.delete({ where: { id } });
   revalidatePath("/library");
   redirect("/library");
+}
+
+export async function setBookRating(id: number, rating: number | null) {
+  const value = rating === null ? null : parseRating(String(rating));
+  await prisma.book.update({ where: { id }, data: { rating: value } });
+  revalidatePath("/library");
+  revalidatePath(`/books/${id}`);
+  revalidatePath("/");
 }

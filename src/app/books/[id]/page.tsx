@@ -9,6 +9,7 @@ import { toggleBookTag } from "@/app/tags/actions";
 import { createNote, deleteNote } from "@/app/notes/actions";
 import { createSession, deleteSession } from "@/app/sessions/actions";
 import { sessionDurationMinutes } from "@/lib/sessions";
+import { BookRatingControl } from "@/components/BookRatingControl";
 
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -47,40 +48,57 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
         </div>
       </div>
 
-      <header className="space-y-2">
-        <h1 className="text-3xl font-semibold">{book.title}</h1>
-        {book.subtitle && <p className="text-lg text-neutral-600">{book.subtitle}</p>}
-        <p className="text-sm text-neutral-700">
-          {book.authors.map((a, index) => (
-            <span key={a.authorId}>
-              <Link href={`/authors/${a.authorId}`} className="hover:underline">
-                {a.author.name}
-              </Link>
-              {index < book.authors.length - 1 && ", "}
-            </span>
-          ))}
-        </p>
-        <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-          {book.publishedYear && (
-            <div>
-              <dt className="text-neutral-500">Published</dt>
-              <dd>{book.publishedYear}</dd>
+      <header className="flex flex-col gap-6 sm:flex-row sm:items-start">
+        <div className="aspect-[2/3] w-32 flex-shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100 sm:w-40">
+          {book.coverUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={book.coverUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-wide text-neutral-400">
+              No cover
             </div>
           )}
-          {book.pageCount && (
-            <div>
-              <dt className="text-neutral-500">Length</dt>
-              <dd>{formatPages(book.pageCount)}</dd>
-            </div>
-          )}
-          {book.isbn && (
-            <div>
-              <dt className="text-neutral-500">ISBN</dt>
-              <dd className="font-mono text-xs">{book.isbn}</dd>
-            </div>
-          )}
-        </dl>
+        </div>
+        <div className="min-w-0 flex-1 space-y-2">
+          <h1 className="text-3xl font-semibold">{book.title}</h1>
+          {book.subtitle && <p className="text-lg text-neutral-600">{book.subtitle}</p>}
+          <p className="text-sm text-neutral-700">
+            {book.authors.map((a, index) => (
+              <span key={a.authorId}>
+                <Link href={`/authors/${a.authorId}`} className="hover:underline">
+                  {a.author.name}
+                </Link>
+                {index < book.authors.length - 1 && ", "}
+              </span>
+            ))}
+          </p>
+          <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+            {book.publishedYear && (
+              <div>
+                <dt className="text-neutral-500">Published</dt>
+                <dd>{book.publishedYear}</dd>
+              </div>
+            )}
+            {book.pageCount && (
+              <div>
+                <dt className="text-neutral-500">Length</dt>
+                <dd>{formatPages(book.pageCount)}</dd>
+              </div>
+            )}
+            {book.isbn && (
+              <div>
+                <dt className="text-neutral-500">ISBN</dt>
+                <dd className="font-mono text-xs">{book.isbn}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
       </header>
+
+      <section className="space-y-2">
+        <h2 className="text-sm font-medium uppercase text-neutral-500">Rating</h2>
+        <BookRatingControl bookId={book.id} rating={book.rating} />
+      </section>
 
       <section className="space-y-2">
         <h2 className="text-sm font-medium uppercase text-neutral-500">Shelves</h2>

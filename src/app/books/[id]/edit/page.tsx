@@ -26,6 +26,7 @@ export default async function EditBookPage({ params }: { params: Promise<{ id: s
           pageCount: book.pageCount,
           coverUrl: book.coverUrl,
           publishedYear: book.publishedYear,
+          rating: book.rating,
           authorNames: book.authors.map((a) => a.author.name),
         }}
       />
